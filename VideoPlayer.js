@@ -1101,12 +1101,21 @@ export default class VideoPlayer extends Component {
      * Provide all of our options and render the whole component.
      */
     render() {
+        let source = this.state.paused === true ? require( './assets/img/play.png' ) : require( './assets/img/pause.png' );
+
         return (
             <TouchableWithoutFeedback
                 onPress={ this.events.onScreenTouch }
                 style={[ styles.player.container, this.styles.containerStyle ]}
             >
                 <View style={[ styles.player.container, this.styles.containerStyle ]}>
+                    {
+                        this.renderControl(
+                            <Image style={{width: 96, height: 96, resizeMode: 'contain'}} source={ source } />,
+                            this.methods.togglePlayPause,
+                            styles.controls.playPause2
+                        )
+                    }
                     <Video
                         { ...this.props }
                         ref={ videoPlayer => this.player.ref = videoPlayer }
@@ -1258,6 +1267,17 @@ const styles = {
             position: 'relative',
             width: 80,
             zIndex: 0
+        },
+        playPause2: {
+            position: 'absolute',
+            width: 96,
+            justifyContent: 'center',
+            alignItems: 'center',
+            top: '50%',
+            left: '50%',
+            marginLeft: -48,
+            marginTop: -48,
+            zIndex: 100
         },
         title: {
             alignItems: 'center',
