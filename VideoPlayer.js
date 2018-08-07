@@ -1113,7 +1113,7 @@ export default class VideoPlayer extends Component {
      * Provide all of our options and render the whole component.
      */
     render() {
-        let source = this.state.paused === true ? require( './assets/img/play2.png' ) : require( './assets/img/pause2.png' );
+        let source = this.state.paused === true ? require( './assets/img/play3.png' ) : require( './assets/img/pause3.png' );
 
         return (
             <TouchableWithoutFeedback
