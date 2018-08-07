@@ -132,6 +132,9 @@ export default class VideoPlayer extends Component {
                 marginTop: new Animated.Value( 0 ),
                 opacity: new Animated.Value( initialValue ),
             },
+            centerControl: {
+                opacity: new Animated.Value( initialValue ),
+            }
             video: {
                 opacity: new Animated.Value( 1 ),
             },
@@ -329,6 +332,10 @@ export default class VideoPlayer extends Component {
                 this.animations.bottomControl.marginBottom,
                 { toValue: -100 }
             ),
+            Animated.timing(
+                this.animations.centerControl.opacity,
+                { toValue: 0 }
+            ),
         ]).start();
     }
 
@@ -354,6 +361,10 @@ export default class VideoPlayer extends Component {
             Animated.timing(
                 this.animations.bottomControl.marginBottom,
                 { toValue: 0 }
+            ),
+            Animated.timing(
+                this.animations.centerControl.opacity,
+                { toValue: 1 }
             ),
         ]).start();
     }
@@ -1102,7 +1113,7 @@ export default class VideoPlayer extends Component {
      * Provide all of our options and render the whole component.
      */
     render() {
-        let source = this.state.paused === true ? require( './assets/img/play.png' ) : require( './assets/img/pause.png' );
+        let source = this.state.paused === true ? require( './assets/img/play2.png' ) : require( './assets/img/pause2.png' );
 
         return (
             <TouchableWithoutFeedback
@@ -1110,6 +1121,11 @@ export default class VideoPlayer extends Component {
                 style={[ styles.player.container, this.styles.containerStyle ]}
             >
                 <View style={[ styles.player.container, this.styles.containerStyle ]}>
+                    <Animated.View style={[
+                        {
+                            opacity: this.animations.bottomControl.opacity,
+                        }
+                    ]}>
                     {
                         this.renderControl(
                             <Image style={{width: 96, height: 96, resizeMode: 'contain'}} source={ source } />,
@@ -1117,6 +1133,7 @@ export default class VideoPlayer extends Component {
                             styles.controls.playPause2
                         )
                     }
+                    </Animated.View>
                     <Video
                         { ...this.props }
                         ref={ videoPlayer => this.player.ref = videoPlayer }
