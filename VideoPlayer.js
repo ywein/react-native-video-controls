@@ -134,7 +134,7 @@ export default class VideoPlayer extends Component {
             },
             centerControl: {
                 opacity: new Animated.Value( initialValue ),
-            }
+            },
             video: {
                 opacity: new Animated.Value( 1 ),
             },
