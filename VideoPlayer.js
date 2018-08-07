@@ -30,6 +30,7 @@ export default class VideoPlayer extends Component {
         muted:                          false,
         title:                          '',
         rate:                           1,
+        isFullscreen:                   false,
     };
 
     constructor( props ) {
@@ -931,7 +932,7 @@ export default class VideoPlayer extends Component {
      */
     renderFullscreen() {
 
-        let source = this.state.isFullscreen === true ? require( './assets/img/shrink.png' ) : require( './assets/img/expand.png' );
+        let source = this.props.isFullscreen === true ? require( './assets/img/shrink.png' ) : require( './assets/img/expand.png' );
         return this.renderControl(
             <Image source={ source } />,
             this.methods.toggleFullscreen,
