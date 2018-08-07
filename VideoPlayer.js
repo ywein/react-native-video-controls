@@ -133,7 +133,7 @@ export default class VideoPlayer extends Component {
                 opacity: new Animated.Value( initialValue ),
             },
             centerControl: {
-                opacity: new Animated.Value( initialValue ),
+                opacity: new Animated.Value( 1 ),
             },
             video: {
                 opacity: new Animated.Value( 1 ),
@@ -1123,12 +1123,22 @@ export default class VideoPlayer extends Component {
                 <View style={[ styles.player.container, this.styles.containerStyle ]}>
                     <Animated.View style={[
                         {
-                            opacity: this.animations.bottomControl.opacity,
+                            position: 'absolute',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            top: '50%',
+                            left: '50%',
+                            marginLeft: -48,
+                            marginTop: -48,
+                            width: 96, 
+                            height: 96,
+                            opacity: this.animations.centerControl.opacity,
+                            zIndex: 999,
                         }
                     ]}>
                     {
                         this.renderControl(
-                            <Image style={{width: 96, height: 96, resizeMode: 'contain'}} source={ source } />,
+                            <Image style={{width: 72, height: 72, resizeMode: 'contain'}} source={ source } />,
                             this.methods.togglePlayPause,
                             styles.controls.playPause2
                         )
@@ -1287,14 +1297,8 @@ const styles = {
             zIndex: 0
         },
         playPause2: {
-            position: 'absolute',
+
             width: 96,
-            justifyContent: 'center',
-            alignItems: 'center',
-            top: '50%',
-            left: '50%',
-            marginLeft: -48,
-            marginTop: -48,
             zIndex: 100
         },
         title: {
