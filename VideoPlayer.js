@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Dimensions } from 'react-native'
 import Video from 'react-native-video';
 import {
     TouchableWithoutFeedback,
@@ -65,6 +66,8 @@ export default class VideoPlayer extends Component {
             currentTime: 0,
             error: false,
             duration: 0,
+            started: false,
+            ended: false,
         };
 
         /**
@@ -134,6 +137,7 @@ export default class VideoPlayer extends Component {
             },
             centerControl: {
                 opacity: new Animated.Value( 1 ),
+                marginLeft: new Animated.Value( -48 ),
             },
             video: {
                 opacity: new Animated.Value( 1 ),
@@ -314,29 +318,35 @@ export default class VideoPlayer extends Component {
      * display to 0 then move them off the
      * screen so they're not interactable
      */
-    hideControlAnimation() {
-        Animated.parallel([
-            Animated.timing(
-                this.animations.topControl.opacity,
-                { toValue: 0 }
-            ),
-            Animated.timing(
-                this.animations.topControl.marginTop,
-                { toValue: -100 }
-            ),
-            Animated.timing(
-                this.animations.bottomControl.opacity,
-                { toValue: 0 }
-            ),
-            Animated.timing(
-                this.animations.bottomControl.marginBottom,
-                { toValue: -100 }
-            ),
-            Animated.timing(
-                this.animations.centerControl.opacity,
-                { toValue: 0 }
-            ),
-        ]).start();
+    hideControlAnimation = () => {
+        if (this.state.started) {
+            Animated.parallel([
+                Animated.timing(
+                    this.animations.topControl.opacity,
+                    { toValue: 0 }
+                ),
+                Animated.timing(
+                    this.animations.topControl.marginTop,
+                    { toValue: -100 }
+                ),
+                Animated.timing(
+                    this.animations.bottomControl.opacity,
+                    { toValue: 0 }
+                ),
+                Animated.timing(
+                    this.animations.bottomControl.marginBottom,
+                    { toValue: -100 }
+                ),
+                Animated.timing(
+                    this.animations.centerControl.opacity,
+                    { toValue: 0 }
+                ),
+                Animated.timing(
+                    this.animations.centerControl.marginLeft,
+                    { toValue: -Dimensions.get('window').width }
+                ),
+            ]).start();
+        }
     }
 
     /**
@@ -365,6 +375,10 @@ export default class VideoPlayer extends Component {
             Animated.timing(
                 this.animations.centerControl.opacity,
                 { toValue: 1 }
+            ),
+            Animated.timing(
+                this.animations.centerControl.marginLeft,
+                { toValue: -48 }
             ),
         ]).start();
     }
@@ -459,14 +473,22 @@ export default class VideoPlayer extends Component {
     _togglePlayPause() {
         let state = this.state;
         state.paused = !state.paused;
-
-        if (state.paused) {
+        state.started = true;
+        if (state.ended) {
+            this.seekTo(0)
+            this.setSeekerPosition(0)
+            typeof this.events.onPlay === 'function' && this.events.onPlay();
+            state.paused = false;
+        }
+        else if (state.paused) {
             typeof this.events.onPause === 'function' && this.events.onPause();
         }
         else {
             typeof this.events.onPlay === 'function' && this.events.onPlay();
         }
-
+        this.resetControlTimeout();
+        
+        state.ended = false;
         this.setState( state );
     }
 
@@ -596,6 +618,7 @@ export default class VideoPlayer extends Component {
     seekTo( time = 0 ) {
         let state = this.state;
         state.currentTime = time;
+        state.ended = false;
         this.player.ref.seek( time );
         this.setState( state );
     }
@@ -1114,7 +1137,9 @@ export default class VideoPlayer extends Component {
      */
     render() {
         let source = this.state.paused === true ? require( './assets/img/play3.png' ) : require( './assets/img/pause3.png' );
-
+        if (this.state.ended) {
+            source = require( './assets/img/repeat.png' )
+        }
         return (
             <TouchableWithoutFeedback
                 onPress={ this.events.onScreenTouch }
@@ -1133,6 +1158,7 @@ export default class VideoPlayer extends Component {
                             width: 96, 
                             height: 96,
                             opacity: this.animations.centerControl.opacity,
+                            marginLeft: this.animations.centerControl.marginLeft,
                             zIndex: 999,
                         }
                     ]}>
@@ -1158,7 +1184,12 @@ export default class VideoPlayer extends Component {
                         onProgress={ this.events.onProgress }
                         onError={ this.events.onError }
                         onLoad={ this.events.onLoad }
-                        onEnd={ this.events.onEnd }
+                        onEnd={ () => {
+                            this.setState({
+                                ended: true
+                            })
+                            this.events.onEnd 
+                        }}
 
                         style={[ styles.player.video, this.styles.videoStyle ]}
 
