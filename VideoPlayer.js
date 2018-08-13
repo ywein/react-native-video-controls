@@ -1036,32 +1036,34 @@ export default class VideoPlayer extends Component {
     renderSeekbar() {
 
         return (
-            <View style={ styles.seekbar.container }>
-                <View
-                    style={ styles.seekbar.track }
-                    onLayout={ event => this.player.seekerWidth = event.nativeEvent.layout.width }
-                >
-                    <View style={[
-                        styles.seekbar.fill,
-                        {
-                            width: this.state.seekerFillWidth,
-                            backgroundColor: this.props.seekColor || '#FFF'
-                        }
-                    ]}/>
+            <TouchableWithoutFeedback onPress={() => {}}>
+                <View style={ styles.seekbar.container }>
+                    <View
+                        style={ styles.seekbar.track }
+                        onLayout={ event => this.player.seekerWidth = event.nativeEvent.layout.width }
+                    >
+                        <View style={[
+                            styles.seekbar.fill,
+                            {
+                                width: this.state.seekerFillWidth,
+                                backgroundColor: this.props.seekColor || '#FFF'
+                            }
+                        ]}/>
+                    </View>
+                    <View
+                        style={[
+                            styles.seekbar.handle,
+                            { left: this.state.seekerPosition }
+                        ]}
+                        { ...this.player.seekPanResponder.panHandlers }
+                    >
+                        <View style={[
+                            styles.seekbar.circle,
+                            { backgroundColor: this.props.seekColor || '#FFF' } ]}
+                        />
+                    </View>
                 </View>
-                <View
-                    style={[
-                        styles.seekbar.handle,
-                        { left: this.state.seekerPosition }
-                    ]}
-                    { ...this.player.seekPanResponder.panHandlers }
-                >
-                    <View style={[
-                        styles.seekbar.circle,
-                        { backgroundColor: this.props.seekColor || '#FFF' } ]}
-                    />
-                </View>
-            </View>
+            </TouchableWithoutFeedback>
         );
     }
     /**
