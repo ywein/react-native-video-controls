@@ -106,6 +106,7 @@ export default class VideoPlayer extends Component {
             toggleControls: this._toggleControls.bind( this ),
             toggleTimer: this._toggleTimer.bind( this ),
             repeat: this._repeat.bind( this ),
+            seek: this.seekTo.bind( this ),
         };
 
         /**
@@ -476,8 +477,7 @@ export default class VideoPlayer extends Component {
         state.paused = !state.paused;
         state.started = true;
         if (state.ended) {
-            this.seekTo(0)
-            this.setSeekerPosition(0)
+            this.seekTo(0, true)
             typeof this.events.onPlay === 'function' && this.events.onPlay();
             state.paused = false;
         }
@@ -501,8 +501,7 @@ export default class VideoPlayer extends Component {
         state.paused = false;
         state.started = true;
         state.ended = false;
-        this.seekTo(0)
-        this.setSeekerPosition(0)
+        this.seekTo(0, true)
         this.setState( state );
     }
 
@@ -629,12 +628,17 @@ export default class VideoPlayer extends Component {
      *
      * @param {float} time time to seek to in ms
      */
-    seekTo( time = 0 ) {
+    seekTo( time = 0, forceSeek = false ) {
         let state = this.state;
         state.currentTime = time;
         state.ended = false;
+        state.seeking = false;
         this.player.ref.seek( time );
         this.setState( state );
+        if ( ! state.seeking || forceSeek) {
+            const position = this.calculateSeekerPosition();
+            this.setSeekerPosition( position );
+        }
     }
 
     /**
