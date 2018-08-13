@@ -105,6 +105,7 @@ export default class VideoPlayer extends Component {
             togglePlayPause: this._togglePlayPause.bind( this ),
             toggleControls: this._toggleControls.bind( this ),
             toggleTimer: this._toggleTimer.bind( this ),
+            repeat: this._repeat.bind( this ),
         };
 
         /**
@@ -489,6 +490,19 @@ export default class VideoPlayer extends Component {
         this.resetControlTimeout();
         
         state.ended = false;
+        this.setState( state );
+    }
+
+    /**
+     * Repeat video
+     */
+    _repeat() {
+        let state = this.state;
+        state.paused = false;
+        state.started = true;
+        state.ended = false;
+        this.seekTo(0)
+        this.setSeekerPosition(0)
         this.setState( state );
     }
 
@@ -982,6 +996,7 @@ export default class VideoPlayer extends Component {
         const timerControl = this.props.disableTimer ? this.renderNullControl() : this.renderTimer();
         const seekbarControl = this.props.disableSeekbar ? this.renderNullControl() : this.renderSeekbar();
         const playPauseControl = this.props.disablePlayPause ? this.renderNullControl() : this.renderPlayPause();
+        const repeat = this.props.disableRepeat ? this.renderNullControl() : this.renderRepeat();
 
         return(
             <Animated.View style={[
@@ -1000,6 +1015,7 @@ export default class VideoPlayer extends Component {
                         styles.controls.row,
                         styles.controls.bottomControlGroup
                     ]}>
+                        { repeat }
                         { playPauseControl }
                         { this.renderTitle() }
                         { timerControl }
@@ -1042,6 +1058,17 @@ export default class VideoPlayer extends Component {
                     />
                 </View>
             </View>
+        );
+    }
+    /**
+     * Render the repeat button 
+     */
+    renderRepeat() {
+        let source = require( './assets/img/repeat.png' );
+        return this.renderControl(
+            <Image style={{width: 40, height: 40}} source={ source } />,
+            this.methods.repeat,
+            styles.controls.playPause
         );
     }
 
@@ -1325,7 +1352,9 @@ const styles = {
         playPause: {
             position: 'relative',
             width: 80,
-            zIndex: 0
+            zIndex: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         playPause2: {
 
