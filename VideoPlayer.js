@@ -332,7 +332,7 @@ export default class VideoPlayer extends Component {
      * screen so they're not interactable
      */
     hideControlAnimation = () => {
-        if (this.state.started) {
+        if (this.state.started && !this.state.ended) {
             Animated.parallel([
                 Animated.timing(
                     this.animations.topControl.opacity,
@@ -650,8 +650,10 @@ export default class VideoPlayer extends Component {
         this.player.ref.seek( time );
         this.setState( state );
         if ( ! state.seeking || forceSeek) {
-            const position = this.calculateSeekerPosition();
-            this.setSeekerPosition( position );
+            const position = this.calculateSeekerPosition(); 
+            if (position) {
+                this.setSeekerPosition( position );
+            }
         }
         
     }
