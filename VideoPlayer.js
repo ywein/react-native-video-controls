@@ -17,6 +17,17 @@ import {
 } from 'react-native';
 import _ from 'lodash';
 
+const { width, height } = Dimensions.get('window');
+
+//Guideline sizes are based on standard ~5" screen mobile device
+// const guidelineBaseWidth = 350;
+// const guidelineBaseHeight = 680;
+const guidelineBaseWidth = 800;
+const guidelineBaseHeight = 1280;
+
+const scale = size =>  width / guidelineBaseWidth * size;
+const moderateScale = (size, factor = 0.5) => size + ( scale(size) - size ) * factor;
+
 export default class VideoPlayer extends Component {
 
     static defaultProps = {
@@ -633,12 +644,16 @@ export default class VideoPlayer extends Component {
         state.currentTime = time;
         state.ended = false;
         state.seeking = false;
+        if (Math.round(state.currentTime) === Math.round(state.duration)) {
+            state.ended = true
+        }
         this.player.ref.seek( time );
         this.setState( state );
         if ( ! state.seeking || forceSeek) {
             const position = this.calculateSeekerPosition();
             this.setSeekerPosition( position );
         }
+        
     }
 
     /**
@@ -1040,7 +1055,7 @@ export default class VideoPlayer extends Component {
                 <View style={ styles.seekbar.container }>
                     <View
                         style={ styles.seekbar.track }
-                        onLayout={ event => this.player.seekerWidth = event.nativeEvent.layout.width }
+                        onLayout={ event => this.player.seekerWidth = event.nativeEvent.layout.width - scale(24)}
                     >
                         <View style={[
                             styles.seekbar.fill,
@@ -1072,9 +1087,9 @@ export default class VideoPlayer extends Component {
     renderRepeat() {
         let source = require( './assets/img/repeat.png' );
         return this.renderControl(
-            <Image style={{width: 40, height: 40}} source={ source } />,
+            <Image style={{width: scale(30), height: scale(30)}} resizeMode='contain' source={ source } />,
             this.methods.repeat,
-            styles.controls.playPause
+            styles.controls.repeat
         );
     }
 
@@ -1197,7 +1212,7 @@ export default class VideoPlayer extends Component {
                     ]}>
                     {
                         this.renderControl(
-                            <Image style={{width: 72, height: 72, resizeMode: 'contain'}} source={ source } />,
+                            <Image style={{width: scale(72), height: scale(72), resizeMode: 'contain'}} source={ source } />,
                             this.methods.togglePlayPause,
                             styles.controls.playPause2
                         )
@@ -1309,12 +1324,13 @@ const styles = {
             resizeMode: 'stretch'
         },
         control: {
-            padding: 16,
+            padding: scale(10),
+            paddingTop: scale(5),
         },
         text: {
             backgroundColor: 'transparent',
             color: '#FFF',
-            fontSize: 14,
+            fontSize: scale(14),
             textAlign: 'center',
         },
         pullRight: {
@@ -1338,8 +1354,8 @@ const styles = {
             justifyContent: 'space-between',
             flexDirection: 'row',
             width: null,
-            margin: 12,
-            marginBottom: 18,
+            margin: scale(12),
+            marginBottom: (18),
         },
         bottomControlGroup: {
             alignSelf: 'stretch',
@@ -1357,14 +1373,16 @@ const styles = {
         },
         playPause: {
             position: 'relative',
-            width: 80,
+            width: scale(80),
             zIndex: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
+        },
+        repeat: {
+            position: 'relative',
+            width: scale(80),
+            zIndex: 0,
         },
         playPause2: {
-
-            width: 96,
+            width: scale(96),
             zIndex: 100
         },
         title: {
@@ -1392,9 +1410,9 @@ const styles = {
             justifyContent: 'flex-start',
             flexDirection: 'row',
             height: 1,
-            marginLeft: 20,
-            marginRight: 20,
-            width: 150,
+            marginLeft: scale(20),
+            marginRight: scale(20),
+            width: scale(150),
         },
         track: {
             backgroundColor: '#333',
@@ -1415,15 +1433,15 @@ const styles = {
     seekbar: StyleSheet.create({
         container: {
             alignSelf: 'stretch',
-            height: 28,
-            marginLeft: 20,
-            marginRight: 20
+            height: moderateScale(24),
+            marginLeft: scale(20),
+            marginRight: scale(20),
         },
         track: {
             backgroundColor: '#333',
             height: 1,
             position: 'relative',
-            top: 14,
+            top: moderateScale(14),
             width: '100%'
         },
         fill: {
@@ -1434,15 +1452,15 @@ const styles = {
         handle: {
             position: 'absolute',
             marginLeft: -7,
-            height: 28,
-            width: 28,
+            height: moderateScale(32),
+            width: moderateScale(32),
         },
         circle: {
             borderRadius: 12,
             position: 'relative',
-            top: 8, left: 8,
-            height: 12,
-            width: 12,
+            top: moderateScale(8), left: 8,
+            height: moderateScale(14),
+            width: moderateScale(14),
         },
     })
 };
