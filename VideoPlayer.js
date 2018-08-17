@@ -68,6 +68,7 @@ export default class VideoPlayer extends Component {
             volumeFillWidth: 0,
             seekerFillWidth: 0,
             showControls: this.props.showOnStart,
+            showMiddleControls: this.props.showOnStart,
             volumePosition: 0,
             seekerPosition: 0,
             volumeOffset: 0,
@@ -125,6 +126,7 @@ export default class VideoPlayer extends Component {
          */
         this.player = {
             controlTimeoutDelay: this.props.controlTimeout || 15000,
+            centerControlTimeoutDelay: this.props.centerControlTimeoutDelay || 2500,
             volumePanResponder: PanResponder,
             seekPanResponder: PanResponder,
             controlTimeout: null,
@@ -214,6 +216,7 @@ export default class VideoPlayer extends Component {
 
         if ( state.showControls ) {
             this.setControlTimeout();
+            this.setCenterControlTimeout();
         }
 
         if ( typeof this.props.onLoad === 'function' ) {
@@ -309,6 +312,13 @@ export default class VideoPlayer extends Component {
         this.player.controlTimeout = setTimeout( ()=> {
             this._hideControls();
         }, this.player.controlTimeoutDelay );
+        
+    }
+
+    setCenterControlTimeout() {
+        this.player.centerControlTimeout = setTimeout( ()=> {
+            this._hideMiddleControls();
+        }, this.player.centerControlTimeoutDelay );
     }
 
     /**
@@ -318,12 +328,21 @@ export default class VideoPlayer extends Component {
         clearTimeout( this.player.controlTimeout );
     }
 
+    clearCenterControlTimeout() {
+        clearTimeout( this.player.centerControlTimeout );
+    }
+
     /**
      * Reset the timer completely
      */
     resetControlTimeout() {
         this.clearControlTimeout();
         this.setControlTimeout();
+    }
+
+    resetCenterControlTimeout() {
+        this.clearCenterControlTimeout();
+        this.setCenterControlTimeout();
     }
 
     /**
@@ -350,6 +369,12 @@ export default class VideoPlayer extends Component {
                     this.animations.bottomControl.marginBottom,
                     { toValue: -100 }
                 ),
+            ]).start();
+        }
+    }
+    hideMiddleControlAnimation = () => {
+        if (this.state.started && !this.state.ended) {
+            Animated.parallel([
                 Animated.timing(
                     this.animations.centerControl.opacity,
                     { toValue: 0 }
@@ -385,15 +410,21 @@ export default class VideoPlayer extends Component {
                 this.animations.bottomControl.marginBottom,
                 { toValue: 0 }
             ),
-            Animated.timing(
-                this.animations.centerControl.opacity,
-                { toValue: 1 }
-            ),
-            Animated.timing(
-                this.animations.centerControl.marginLeft,
-                { toValue: -48 }
-            ),
         ]).start();
+    }
+    showMiddleControlAnimation = () => {
+        if (this.state.started && !this.state.ended) {
+            Animated.parallel([
+                Animated.timing(
+                    this.animations.centerControl.opacity,
+                    { toValue: 1 }
+                ),
+                Animated.timing(
+                    this.animations.centerControl.marginLeft,
+                    { toValue: -48 }
+                ),
+            ]).start();
+        }
     }
 
     /**
@@ -436,6 +467,16 @@ export default class VideoPlayer extends Component {
         }
     }
 
+    _hideMiddleControls() {
+        if(this.mounted) {
+            let state = this.state;
+            state.showMiddleControls = false;
+            this.hideMiddleControlAnimation();
+
+            this.setState( state );
+        }
+    }
+
     /**
      * Function to toggle controls based on
      * current state.
@@ -443,14 +484,21 @@ export default class VideoPlayer extends Component {
     _toggleControls() {
         let state = this.state;
         state.showControls = ! state.showControls;
-
+        state.showMiddleControls = ! state.showMiddleControls;
         if ( state.showControls ) {
             this.showControlAnimation();
-            this.setControlTimeout();
-        }
-        else {
+            this.resetControlTimeout();
+            this.showMiddleControlAnimation();
+            this.resetCenterControlTimeout();
+        } else if (state.showMiddleControls) {
+            this.showMiddleControlAnimation();
+            this.resetControlTimeout();
+            this.resetCenterControlTimeout();
+        } else {
             this.hideControlAnimation();
             this.clearControlTimeout();
+            this.hideMiddleControlAnimation();
+            this.clearCenterControlTimeout();
         }
 
         this.setState( state );
@@ -499,7 +547,7 @@ export default class VideoPlayer extends Component {
             typeof this.events.onPlay === 'function' && this.events.onPlay();
         }
         this.resetControlTimeout();
-        
+        this.resetCenterControlTimeout();
         state.ended = false;
         this.setState( state );
     }
@@ -645,6 +693,7 @@ export default class VideoPlayer extends Component {
         state.ended = false;
         state.seeking = false;
         if (Math.round(state.currentTime) === Math.round(state.duration)) {
+            this.showControlAnimation()
             state.ended = true
         }
         this.player.ref.seek( time );
@@ -820,6 +869,7 @@ export default class VideoPlayer extends Component {
                 } else {
                     this.seekTo( time );
                     this.setControlTimeout();
+                    this.setCenterControlTimeout();
                     state.seeking = false;
                 }
                 this.setState( state );
@@ -867,6 +917,7 @@ export default class VideoPlayer extends Component {
                 let state = this.state;
                 state.volumeOffset = state.volumePosition;
                 this.setControlTimeout();
+                this.setCenterControlTimeout();
                 this.setState( state );
             }
         });
@@ -898,6 +949,7 @@ export default class VideoPlayer extends Component {
                 activeOpacity={ 0.3 }
                 onPress={()=>{
                     this.resetControlTimeout();
+                    this.resetCenterControlTimeout();
                     callback();
                 }}
                 style={[
@@ -1087,7 +1139,7 @@ export default class VideoPlayer extends Component {
      * Render the repeat button 
      */
     renderRepeat() {
-        let source = require( './assets/img/repeat.png' );
+        let source = require( './assets/img/repeat2.png' );
         return this.renderControl(
             <Image style={{width: scale(30), height: scale(30)}} resizeMode='contain' source={ source } />,
             this.methods.repeat,
@@ -1235,6 +1287,7 @@ export default class VideoPlayer extends Component {
                         onError={ this.events.onError }
                         onLoad={ this.events.onLoad }
                         onEnd={ () => {
+                            this.showControlAnimation();
                             this.setState({
                                 ended: true
                             })
