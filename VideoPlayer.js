@@ -213,7 +213,6 @@ export default class VideoPlayer extends Component {
         state.duration = data.duration;
         state.loading = false;
         this.setState( state );
-
         if ( state.showControls ) {
             this.setControlTimeout();
             this.setCenterControlTimeout();
@@ -351,7 +350,7 @@ export default class VideoPlayer extends Component {
      * screen so they're not interactable
      */
     hideControlAnimation = () => {
-        if (this.state.started && !this.state.ended) {
+        if (!this.state.ended) {
             Animated.parallel([
                 Animated.timing(
                     this.animations.topControl.opacity,
@@ -373,7 +372,7 @@ export default class VideoPlayer extends Component {
         }
     }
     hideMiddleControlAnimation = () => {
-        if (this.state.started && !this.state.ended) {
+        if (!this.state.ended) {
             Animated.parallel([
                 Animated.timing(
                     this.animations.centerControl.opacity,
@@ -413,7 +412,7 @@ export default class VideoPlayer extends Component {
         ]).start();
     }
     showMiddleControlAnimation = () => {
-        if (this.state.started && !this.state.ended) {
+        if (!this.state.ended) {
             Animated.parallel([
                 Animated.timing(
                     this.animations.centerControl.opacity,
@@ -1287,11 +1286,12 @@ export default class VideoPlayer extends Component {
                         onError={ this.events.onError }
                         onLoad={ this.events.onLoad }
                         onEnd={ () => {
+                            this.showMiddleControlAnimation();
                             this.showControlAnimation();
                             this.setState({
                                 ended: true
                             })
-                            this.events.onEnd 
+                            this.events.onEnd
                         }}
 
                         style={[ styles.player.video, this.styles.videoStyle ]}
