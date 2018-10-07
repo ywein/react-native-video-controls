@@ -1105,7 +1105,8 @@ export default class VideoPlayer extends Component {
 
         return (
             <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={ styles.seekbar.container }>
+                <View
+                  style={ styles.seekbar.container }>
                     <View
                         style={ styles.seekbar.track }
                         onLayout={ event => this.player.seekerWidth = event.nativeEvent.layout.width - scale(24)}
@@ -1119,11 +1120,11 @@ export default class VideoPlayer extends Component {
                         ]}/>
                     </View>
                     <View
-                        style={[
+                      { ...this.player.seekPanResponder.panHandlers }
+                      style={[
                             styles.seekbar.handle,
                             { left: this.state.seekerPosition }
                         ]}
-                        { ...this.player.seekPanResponder.panHandlers }
                     >
                         <View style={[
                             styles.seekbar.circle,
@@ -1488,7 +1489,7 @@ const styles = {
     seekbar: StyleSheet.create({
         container: {
             alignSelf: 'stretch',
-            height: moderateScale(24),
+            height: moderateScale(32),
             marginLeft: scale(20),
             marginRight: scale(20),
         },
@@ -1505,17 +1506,21 @@ const styles = {
             width: '100%'
         },
         handle: {
+            borderColor: '#ff0000',
+            borderWidth: 1,
             position: 'absolute',
-            marginLeft: -7,
+            marginLeft: -(width - scale(50)*2)/2,
             height: moderateScale(32),
-            width: moderateScale(32),
+            width: width - scale(50)*2,
+            alignItems: 'center',
         },
         circle: {
             borderRadius: 12,
             position: 'relative',
-            top: moderateScale(8), left: 8,
-            height: moderateScale(14),
-            width: moderateScale(14),
+            top: moderateScale(6), left: moderateScale(6),
+            height: moderateScale(18),
+            width: moderateScale(18),
+            margin: 'auto',
         },
     })
 };
