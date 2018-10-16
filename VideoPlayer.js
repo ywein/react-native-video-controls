@@ -531,36 +531,46 @@ export default class VideoPlayer extends Component {
      * Toggle playing state on <Video> component
      */
     _togglePlayPause() {
-        let state = this.state;
+        let state = Object.assign({}, this.state);
         state.paused = !state.paused;
         state.started = true;
         if (state.ended) {
             this.seekTo(0, true)
-            typeof this.events.onPlay === 'function' && this.events.onPlay();
             state.paused = false;
-        }
-        else if (state.paused) {
+            state.ended = false;
+            setTimeout(() => {
+              typeof this.events.onPlay === 'function' && this.events.onPlay();
+              this.setState( state );
+            }, 100)
+
+        } else {
+          if (state.paused) {
             typeof this.events.onPause === 'function' && this.events.onPause();
-        }
-        else {
+          }
+          else {
             typeof this.events.onPlay === 'function' && this.events.onPlay();
+          }
+          this.resetControlTimeout();
+          this.resetCenterControlTimeout();
+          state.ended = false;
+          this.setState( state );
         }
-        this.resetControlTimeout();
-        this.resetCenterControlTimeout();
-        state.ended = false;
-        this.setState( state );
+
     }
 
     /**
      * Repeat video
      */
     _repeat() {
-        let state = this.state;
+        let state = Object.assign({}, this.state);
         state.paused = false;
         state.started = true;
         state.ended = false;
         this.seekTo(0, true)
-        this.setState( state );
+        setTimeout(() => {
+          typeof this.events.onPlay === 'function' && this.events.onPlay();
+          this.setState( state );
+        }, 100)
     }
 
     /**
@@ -687,11 +697,11 @@ export default class VideoPlayer extends Component {
      * @param {float} time time to seek to in ms
      */
     seekTo( time = 0, forceSeek = false ) {
-        let state = this.state;
+        let state = Object.assign({}, this.state);
         state.currentTime = time;
         state.ended = false;
         state.seeking = false;
-        if (Math.round(state.currentTime) === Math.round(state.duration)) {
+        if (Math.round(state.currentTime) - 1 < Math.round(state.duration)) {
             this.showControlAnimation()
             state.ended = true
         }
@@ -703,7 +713,6 @@ export default class VideoPlayer extends Component {
                 this.setSeekerPosition( position );
             }
         }
-        
     }
 
     /**
@@ -1290,9 +1299,10 @@ export default class VideoPlayer extends Component {
                             this.showMiddleControlAnimation();
                             this.showControlAnimation();
                             this.setState({
+                                paused: true,
                                 ended: true
                             })
-                            this.events.onEnd
+                            typeof this.events.onEnd === 'function' && this.events.onEnd();
                         }}
 
                         style={[ styles.player.video, this.styles.videoStyle ]}
@@ -1359,6 +1369,7 @@ const styles = {
             left: 0,
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 20,
         },
     }),
     controls: StyleSheet.create({
@@ -1506,7 +1517,7 @@ const styles = {
             width: '100%'
         },
         handle: {
-            borderColor: '#ff0000',
+            borderColor: 'transparent',
             borderWidth: 1,
             position: 'absolute',
             marginLeft: -(width - scale(50)*2)/2,
