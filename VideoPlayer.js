@@ -701,7 +701,7 @@ export default class VideoPlayer extends Component {
         state.currentTime = time;
         state.ended = false;
         state.seeking = false;
-        if (Math.round(state.currentTime) - 1 < Math.round(state.duration)) {
+        if (Math.round(state.currentTime) - 1 < Math.round(state.duration) && Math.round(state.duration) < Math.round(state.currentTime) + 2) {
             this.showControlAnimation()
             state.ended = true
         }
